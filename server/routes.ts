@@ -304,7 +304,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Professional inpainting with prompt: ${prompt}`);
       console.log(`Settings: strength=${promptStrength}, blur=${maskBlur}`);
 
-      // Use FLUX Fill Pro for professional inpainting
+      // Use official FLUX Fill Pro slug
       const output = await replicate.run(
         "black-forest-labs/flux-fill-pro",
         {
@@ -398,9 +398,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Final image URL for Replicate: ${processedImageUrl}`);
       console.log('Using SDXL for professional furniture customization...');
       
-      // Use a valid SDXL version from Replicate
+      // Use official SDXL slug as recommended
       const output = await replicate.run(
-        "stability-ai/sdxl:7762fd07cf2741a6c0b355e0577933f4444529973c67e792c84a956383c130e1",
+        "stability-ai/sdxl",
         {
           input: {
             prompt: prompt,
