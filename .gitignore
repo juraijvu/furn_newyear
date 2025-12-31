@@ -1,0 +1,8 @@
+.env
+.local/
+uploads/
+node_modules/
+dist/
+build/
+.vite/
+.DS_Store
