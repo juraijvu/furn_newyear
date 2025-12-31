@@ -359,7 +359,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Image URL: ${imageUrl}`);
 
       const colorName = getColorName(color);
-      const prompt = `Change the ${furniturePart} color to ${colorName}, keep everything else exactly the same`;
+      const prompt = `Professional product photo: Change the ${furniturePart} to ${colorName}, high-end furniture photography, maintaining original lighting and shadows, no color bleeding, seamless material transition`;
       
       console.log(`Using prompt: ${prompt}`);
 
@@ -395,21 +395,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Use the working InstPix2Pix model for perfect color changing
+      // Use SDXL for image transformation - highly reliable model
+      console.log('Using Stability SDXL for furniture color transformation...');
       const output = await replicate.run(
-        "timothybrooks/instruct-pix2pix",
+        "stability-ai/sdxl",
         {
           input: {
-            image: processedImageUrl,
             prompt: prompt,
-            num_inference_steps: 20,
-            image_guidance_scale: 1.5,
-            guidance_scale: 7.5
+            negative_prompt: "blurry, low quality, distorted, ugly, bad proportions",
+            image: processedImageUrl,
+            num_inference_steps: 30,
+            guidance_scale: 7.5,
+            scheduler: "K_EULER",
+            strength: 0.7
           }
         }
       );
 
-      console.log('InstPix2Pix output:', JSON.stringify(output, null, 2));
+      console.log('SDXL output:', JSON.stringify(output, null, 2));
       
       let resultUrl: string;
       if (Array.isArray(output) && output.length > 0) {
