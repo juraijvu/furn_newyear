@@ -346,7 +346,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Combined workflow: Simple color change with working models
+  // Combined workflow: Professional inpainting for furniture color change
   app.post("/api/professional-recolor", async (req, res) => {
     try {
       const { imageUrl, color, material = 'fabric', furniturePart = 'cushion' } = req.body;
@@ -355,11 +355,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Missing required parameters: imageUrl, color" });
       }
 
-      console.log(`Starting color change: ${color} on ${furniturePart}`);
+      console.log(`Starting professional color change: ${color} on ${furniturePart}`);
       console.log(`Image URL: ${imageUrl}`);
 
       const colorName = getColorName(color);
-      const prompt = `Professional product photo: Change the ${furniturePart} to ${colorName}, high-end furniture photography, maintaining original lighting and shadows, no color bleeding, seamless material transition`;
+      const prompt = `${colorName} ${material} ${furniturePart}, professional furniture photography, high-end, realistic, maintaining original lighting and shadows, seamless material transition, photorealistic`;
       
       console.log(`Using prompt: ${prompt}`);
 
@@ -371,48 +371,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ? imageUrl.replace('http://localhost:5000', `https://${process.env.REPLIT_DEV_DOMAIN}`)
         : imageUrl;
       
-      // If localhost, convert to base64 for local development
       if (imageUrl.includes('localhost') || imageUrl.includes('127.0.0.1')) {
-        if (!process.env.REPLIT_DEV_DOMAIN) {
-          try {
-            console.log('Converting localhost image to base64 for local development...');
-            const response = await fetch(imageUrl);
-            if (!response.ok) {
-              throw new Error(`Failed to fetch image: ${response.status}`);
-            }
-            const buffer = await response.arrayBuffer();
-            const base64 = Buffer.from(buffer).toString('base64');
-            const mimeType = response.headers.get('content-type') || 'image/png';
-            processedImageUrl = `data:${mimeType};base64,${base64}`;
-            console.log('Successfully converted to base64');
-          } catch (error) {
-            console.error('Failed to convert image:', error);
-            throw new Error('Failed to process image for AI model');
-          }
-        } else {
-          processedImageUrl = replicateImageUrl;
-          console.log('Using Replit public URL:', processedImageUrl);
-        }
+        processedImageUrl = replicateImageUrl || imageUrl;
       }
 
-      // Use Stability Diffusion - core, proven model for image generation
-      console.log('Using Stability Diffusion for furniture color transformation...');
+      console.log(`Final image URL: ${processedImageUrl}`);
+      console.log('Using FLUX Fill Pro for professional inpainting...');
+      
+      // Use FLUX Fill Pro - professional inpainting model optimized for furniture
       const output = await replicate.run(
-        "stability-ai/stable-diffusion",
+        "black-forest-labs/flux-fill-pro",
         {
           input: {
+            image: processedImageUrl,
             prompt: prompt,
-            negative_prompt: "blurry, low quality, distorted, ugly, bad proportions",
-            num_outputs: 1,
-            num_inference_steps: 25,
-            guidance_scale: 7.5,
-            width: 512,
-            height: 512
+            prompt_strength: 0.85,
+            seed: Math.floor(Math.random() * 1000000),
+            steps: 24,
+            guidance: 3.5
           }
         }
       );
 
-      console.log('Stability Diffusion output:', JSON.stringify(output, null, 2));
+      console.log('FLUX Fill Pro output:', JSON.stringify(output, null, 2));
       
       let resultUrl: string;
       if (Array.isArray(output) && output.length > 0) {
