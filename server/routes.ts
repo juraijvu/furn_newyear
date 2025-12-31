@@ -395,25 +395,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Use Anything V3 model - proven stable diffusion model for image transformation
-      console.log('Using Anything V3.0 model for furniture color transformation...');
+      // Use Stability Diffusion - core, proven model for image generation
+      console.log('Using Stability Diffusion for furniture color transformation...');
       const output = await replicate.run(
-        "cjwbw/anything-v3.0",
+        "stability-ai/stable-diffusion",
         {
           input: {
             prompt: prompt,
-            negative_prompt: "blurry, low quality, distorted, ugly, bad proportions, text, watermark",
+            negative_prompt: "blurry, low quality, distorted, ugly, bad proportions",
             num_outputs: 1,
             num_inference_steps: 25,
             guidance_scale: 7.5,
             width: 512,
-            height: 512,
-            scheduler: "DPMSolverMultistep"
+            height: 512
           }
         }
       );
 
-      console.log('Anything V3.0 output:', JSON.stringify(output, null, 2));
+      console.log('Stability Diffusion output:', JSON.stringify(output, null, 2));
       
       let resultUrl: string;
       if (Array.isArray(output) && output.length > 0) {
