@@ -417,23 +417,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
         } catch (error: any) {
           console.error(`Error running model ${modelSlug}:`, error);
-          if (modelSlug === "stability-ai/sdxl") {
-            console.log("Falling back to stability-ai/stable-diffusion-3");
-            return await replicate.run(
-              "stability-ai/stable-diffusion-3" as any,
-              {
-                input: {
-                  prompt: prompt,
-                  negative_prompt: "blurry, low quality, distorted, deformed, pixelated",
-                  num_outputs: 1,
-                  aspect_ratio: "1:1",
-                  output_format: "webp",
-                  output_quality: 80
-                }
+          // Fallback to the known stable SDXL version ID if the slug fails
+          console.log("Falling back to stable SDXL version...");
+          return await replicate.run(
+            "stability-ai/sdxl:7762fd07cf2741a6c0b355e0577933f4444529973c67e792c84a956383c130e1",
+            {
+              input: {
+                prompt: prompt,
+                negative_prompt: "blurry, low quality, distorted, deformed, pixelated",
+                num_outputs: 1,
+                scheduler: "K_EULER",
+                num_inference_steps: 50,
+                guidance_scale: 7.5,
+                seed: Math.floor(Math.random() * 1000000)
               }
-            );
-          }
-          throw error;
+            }
+          );
         }
       };
 
